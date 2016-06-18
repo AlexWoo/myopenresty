@@ -1,0 +1,39 @@
+DATETIME=`date +%Y%m%d%H%M%S`
+
+add_user()
+{
+    grep "^$OUSER:" /etc/passwd > /dev/null
+    if [ $? -ne 0 ];then
+        echo "$OUSER does not exist, create it"
+        useradd $OUSER
+    fi
+    USERPATH=/home/$OUSER
+}
+
+copy_nginx()
+{
+    if [ -d $USERPATH/nginx -a $REINSTALL == "no" ];then
+        echo "$USERPATH/nginx has been exist, only copy executable bin file"
+        mv $USERPATH/nginx/sbin/nginx $USERPATH/nginx/sbin/nginx.$DATETIME
+        cp $PREFIX/nginx/sbin/nginx $USERPATH/nginx/sbin/
+    else
+        if [ -d $USERPATH/nginx ];then
+            echo "$USERPATH/nginx has been exist, backup directory"
+            mv $USERPATH/nginx $USERPATH/nginx.$DATETIME
+        fi
+        cp -rf $PREFIX/nginx/ $USERPATH/
+    fi
+}
+
+conf_nginx()
+{
+    grep "alias nginx" $USERPATH/.bashrc > /dev/null
+    if [ $? -ne 0 ];then
+        echo "alias nginx=\"$USERPATH/nginx/sbin/nginx -p $USERPATH/nginx\"" >> $USERPATH/.bashrc
+    fi
+}
+
+add_user
+copy_nginx
+conf_nginx
+

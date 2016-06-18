@@ -1,0 +1,48 @@
+PREFIX=/usr/local/openresty
+OUSER=openresty
+REINSTALL=$OPENRESTY_FORCE_REINSTALL
+CONF=conf
+PACKAGETYPE=
+DEFAULTPKG=openresty-1.9.7.4
+
+if [ -n "$OPENRESTY_PREFIX" ];then
+    PREFIX=$OPENRESTY_PREFIX
+fi
+
+if [ -n "$OPENRESTY_USER" ];then
+    OUSER=$OPENRESTY_USER
+fi
+
+if [ -n "$OPENRESTY_CONFDIR" ];then
+    CONF=$OPENRESTY_CONFDIR
+fi
+
+if [ -n "$OPENRESTY_PACKAGE" ];then
+    if [ -f $OPENRESTY_PACKAGE ];then
+        PACKAGETYPE=file
+        PACKAGE=$OPENRESTY_PACKAGE
+    elif [ -d $OPENRESTY_PACKAGE ];then
+        PACKAGETYPE=dir
+        PACKAGE=$OPENRESTY_PACKAGE
+    else
+        echo $OPENRESTY_PACKAGE | grep "^https\{0,1\}://" > /dev/null
+        if [ $? -ne 0 ];then
+            echo "\"$OPENRESTY_PACKAGE\" is not a tar nor dir not downloadlink"
+            exit 1
+        fi
+        PACKAGETYPE=link
+        PACKAGE=$OPENRESTY_PACKAGE
+    fi
+else
+    if [ -f $DEFAULTPKG.tar.gz ];then
+        PACKAGETYPE=file    
+        PACKAGE=$DEFAULTPKG.tar.gz
+    elif [ -d $DEFAULTPKG ];then
+        PACKAGETYPE=dir
+        PACKAGE=$DEFAULTPKG
+    else
+        PACKAGETYPE=link
+        PACKAGE=https://openresty.org/download/$DEFAULTPKG.tar.gz
+    fi
+fi
+

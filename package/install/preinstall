@@ -1,0 +1,73 @@
+check_openresty_install()
+{
+    if [ -d "$PREFIX" -a -d "$PREFIX/lualib" -a -d "$PREFIX/nginx" ];then
+        nm $PREFIX/nginx/sbin/nginx  |grep init_by_lua > /dev/null
+        if [ $? -eq 0 ];then
+            echo "Openresty has been installed"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+install_drizzle()
+{
+    if [ ! -f /usr/local/lib/libdrizzle.so ];then
+        echo "Drizzle has not been installed"
+        if [ ! -f drizzle7-2011.07.21.tar.gz ];then
+            wget http://openresty.org/download/drizzle7-2011.07.21.tar.gz || exit 2
+        fi
+
+        if [ -f drizzle7-2011.07.21.tar.gz ];then
+            tar xzf drizzle7-2011.07.21.tar.gz || exit 2
+        fi
+
+        if [ -d drizzle7-2011.07.21 ];then
+            cd drizzle7-2011.07.21 && ./configure --without-server && make libdrizzle-1.0 && make install-libdrizzle-1.0 || exit 2
+            cd ..
+        fi
+    else
+        echo "Drizzle has been installed"
+    fi
+}
+
+install_pcre()
+{
+    rpm -qa | grep pcre-devel > /dev/null
+    if [ $? -eq 1 ];then
+        echo "Pcre-devel lib has not been installed"
+        yum install -y pcre pcre-devel || exit 2
+    else
+        echo "Pcre-devel lib has been installed"
+    fi
+}
+
+install_openssl()
+{
+    rpm -qa | grep openssl-devel > /dev/null
+    if [ $? -eq 1 ];then
+        echo "Openssl-devel lib has not been installed"
+        yum install -y openssl openssl-devel || exit 2 
+    else
+        echo "Openssl-devel lib has been installed"
+    fi
+}
+
+add_ldconf()
+{
+    grep "/usr/local/lib" /etc/ld.so.conf.d/local.conf || echo "/usr/local/lib" >> /etc/ld.so.conf.d/local.conf
+    ldconfig
+}
+
+check_openresty_install 
+if [ $? -ne 0 ];then
+    echo "Openresty has not been installed"
+    install_drizzle
+    install_pcre
+    install_openssl
+    add_ldconf
+    HASINSTALL=no
+else
+    HASINSTALL=yes
+fi
+

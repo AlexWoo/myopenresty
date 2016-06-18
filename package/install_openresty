@@ -1,0 +1,20 @@
+#! /bin/bash
+
+. install/options
+. install/init
+. install/preinstall
+if [ $HASINSTALL == "no" -o $REINSTALL == "yes" ];then
+    . install/install
+fi
+if [ $OUSER != "root" ];then
+    . install/installtouser
+fi
+
+echo $PREFIX
+echo $OUSER
+echo $REINSTALL
+echo $CONF
+echo $PACKAGETYPE
+echo $PACKAGE
+
+
