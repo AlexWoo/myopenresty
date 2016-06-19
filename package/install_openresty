@@ -10,11 +10,3 @@ if [ $OUSER != "root" ];then
     . install/installtouser
 fi
 
-echo $PREFIX
-echo $OUSER
-echo $REINSTALL
-echo $CONF
-echo $PACKAGETYPE
-echo $PACKAGE
-
-
