@@ -1,0 +1,128 @@
+#!/usr/bin/python
+
+import os
+import sys
+
+
+if len(sys.argv) != 2:
+    print("Usage: " + sys.argv[0] + " service")
+    sys.exit(1)
+
+service = sys.argv[1]
+version = "0.0.1"
+install_path = "/usr/local/" + service
+
+packages = {
+    "openresty": {
+        "url":  "https://openresty.org/download/openresty-1.11.2.5.tar.gz",
+        "options":
+            "--prefix=" + install_path +
+            " --with-openssl=../openssl --with-pcre=../pcre",
+        "install": "make && make install",
+        "config": "./config " + install_path,
+        "service": "./service " + service
+    },
+    "openssl": {
+        "url": "https://www.openssl.org/source/openssl-1.0.2m.tar.gz"
+    },
+    "pcre": {
+        "url": "https://ftp.pcre.org/pub/pcre/pcre-8.41.tar.gz"
+    }
+}
+
+modules = {}
+
+lualib = {
+    "lua-resty-http": {
+        "url": "https://github.com/pintsized/lua-resty-http.git",
+        "path": "lib/*",
+        "tag": ""
+    }
+}
+
+
+def download(name, url):
+    pack = os.path.basename(url)
+    pdir = pack.split(".tar.gz")[0]
+
+    if not os.path.isdir(name):
+        if not os.path.isfile(pack):
+            os.system("wget " + url)
+        os.system("tar xzf " + pack)
+        os.rename(pdir, name)
+
+
+def addmodule(module):
+    tag = ""
+    path = os.path.basename(module["url"]).split(".git")[0]
+    option = " --add-module=../" + path
+    if len(module["tag"]) > 0:
+        tag = " -b " + module["tag"]
+
+    if not os.path.exists(path):
+        os.system("git clone " + module["url"] + tag)
+
+    return option
+
+
+def install(name):
+    options = packages[name]["options"]
+    install = packages[name]["install"]
+    config = packages[name].get("config")
+    service = packages[name].get("service")
+
+    if install and len(install) > 0:
+        os.chdir(name)
+        os.system("./configure " + options + " && " + install)
+        os.chdir("../")
+
+    if config and len(config) > 0:
+        print(config)
+        os.system(config)
+
+    if service and len(service) > 0:
+        print(service)
+        os.system(service)
+
+
+def addlualib(lib):
+    tag = ""
+    path = os.path.basename(lib["url"]).split(".git")[0]
+    src_path = path + "/" + lib["path"]
+    dest_path = install_path + "/lualib/"
+    if len(lib["tag"]) > 0:
+        tag = " -b " + lib["tag"]
+
+    if not os.path.exists(path):
+        os.system("git clone " + lib["url"] + tag)
+
+    print("cp -r " + src_path + " " + dest_path)
+    os.system("cp -r " + src_path + " " + dest_path)
+
+
+def config():
+    print("cp conf/* " + install_path + "/nginx/conf/")
+    os.system("cp conf/* " + install_path + "/nginx/conf/")
+
+    print("mkdir -p " + install_path + "/nginx/service")
+    os.system("mkdir -p " + install_path + "/nginx/service")
+
+
+if __name__ == '__main__':
+    for name, package in packages.items():
+        download(name, package["url"])
+
+    os.system("./version " + service + " " + version)
+
+    for module in modules.values():
+        packages["openresty"]["options"] += addmodule(module)
+
+    install("openresty")
+
+    print("./service " + service)
+    os.system("./service " + service)
+
+    for lib in lualib.values():
+        addlualib(lib)
+
+    config()

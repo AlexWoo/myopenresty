@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $# -ne 1 ];then
+    echo "Usage: $0 service"
+    exit 1
+fi
+
+service=$1
+
+tmp=`systemctl`
+if [ $? -ne 0 ];then
+    sed "s/{service}/$service/g" service.init > /etc/init.d/$service
+    chmod a+x /etc/init.d/$service
+else
+    sed "s/{service}/$service/g" service.systemd > /lib/systemd/system/$service.service
+fi
