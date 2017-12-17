@@ -100,14 +100,6 @@ def addlualib(lib):
     os.system("cp -r " + src_path + " " + dest_path)
 
 
-def config():
-    print("cp conf/* " + install_path + "/nginx/conf/")
-    os.system("cp conf/* " + install_path + "/nginx/conf/")
-
-    print("mkdir -p " + install_path + "/nginx/service")
-    os.system("mkdir -p " + install_path + "/nginx/service")
-
-
 if __name__ == '__main__':
     for name, package in packages.items():
         download(name, package["url"])
@@ -125,4 +117,5 @@ if __name__ == '__main__':
     for lib in lualib.values():
         addlualib(lib)
 
-    config()
+    print("./config " + install_path + " " + service)
+    os.system("./config " + install_path + " " + service)
