@@ -24,11 +24,11 @@ echo $port
 echo $domain
 
 cp conf/* $install_path/nginx/conf/
-mkdir -p $install_path/nginx/service
+mkdir -p $install_path/nginx/services
 
-sed "s/{service}/$service/g" tmpl/service.conf > $install_path/nginx/service/$service.conf
-sed -i "s/{port}/$port/g" $install_path/nginx/service/$service.conf
-sed -i "s/{domain}/$domain/g" $install_path/nginx/service/$service.conf
+sed "s/{service}/$service/g" tmpl/service.conf > $install_path/nginx/services/$service.conf
+sed -i "s/{port}/$port/g" $install_path/nginx/services/$service.conf
+sed -i "s/{domain}/$domain/g" $install_path/nginx/services/$service.conf
 
-mkdir -p $install_path/nginx/service/$service
-cp -rf tmpl/service/* $install_path/nginx/service/$service/
+mkdir -p $install_path/nginx/services/$service
+cp -rf tmpl/service/* $install_path/nginx/services/$service/
