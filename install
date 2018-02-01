@@ -117,5 +117,5 @@ if __name__ == '__main__':
     for lib in lualib.values():
         addlualib(lib)
 
-    print("./config " + install_path + " " + service)
-    os.system("./config " + install_path + " " + service)
+#    print("./config " + install_path + " " + service)
+#    os.system("./config " + install_path + " " + service)

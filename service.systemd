@@ -5,7 +5,6 @@ After=network.target remote-fs.target nss-lookup.target
 [Service]
 Type=forking
 PIDFile=/usr/local/{service}/nginx/logs/nginx.pid
-ExecStartPre=/usr/bin/rm -f $PIDFile
 ExecStartPre=/usr/local/{service}/nginx/sbin/nginx -t
 ExecStart=/usr/local/{service}/nginx/sbin/nginx
 ExecReload=/bin/kill -s HUP $MAINPID
